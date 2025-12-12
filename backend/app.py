@@ -18,7 +18,7 @@ def update():
         subprocess.check_call(f"cd {backend_path} && git reset --hard && git pull origin main", shell=True)
 
         # Install dependencies using virtualenv python
-        subprocess.check_call(f"{venv_python} -m pip install -r {backend_path}/requirements.txt", shell=True)
+        #subprocess.check_call(f"{venv_python} -m pip install -r {backend_path}/requirements.txt", shell=True)
 
         # Reload app
         subprocess.check_call(f"touch {wsgi_file}", shell=True)
