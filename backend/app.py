@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return "Hello World"
+    return "Hello World test ci cd update endpoint"
 
 @app.route("/update")
 def update():
