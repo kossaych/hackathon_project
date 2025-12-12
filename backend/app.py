@@ -10,9 +10,9 @@ def index():
 @app.route("/update")
 def update():
     try:
-        backend_path = "/home/yourusername/your-repo/backend"
-        venv_python = "/home/yourusername/venv/bin/python3.10"  # adjust to your virtualenv python
-        wsgi_file = "/var/www/yourusername_pythonanywhere_com_wsgi.py"
+        backend_path = "/home/hackathonharmonyteam/hachathon_project/backend"
+        venv_python = "/home/hackathonharmonyteam/venv/bin/python3.10"  # adjust to your virtualenv python
+        wsgi_file = "/var/www/hackathonharmonyteam_pythonanywhere_com_wsgi.py"
 
         # Pull latest code
         subprocess.check_call(f"cd {backend_path} && git reset --hard && git pull origin main", shell=True)
