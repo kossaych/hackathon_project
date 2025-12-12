@@ -1,5 +1,5 @@
 from flask import Flask
-import os
+import subprocess
 
 app = Flask(__name__)
 
@@ -7,13 +7,25 @@ app = Flask(__name__)
 def index():
     return "Hello World"
 
-
 @app.route("/update")
 def update():
-    os.system("cd ~/your-repo/backend && git reset --hard && git pull origin main")
-    os.system("source ~/venv/bin/activate && pip install -r requirements.txt")
-    os.system("touch yourapp_wsgi.py")  # reload
-    return "Updated!"
+    try:
+        backend_path = "/home/yourusername/your-repo/backend"
+        venv_python = "/home/yourusername/venv/bin/python3.10"  # adjust to your virtualenv python
+        wsgi_file = "/var/www/yourusername_pythonanywhere_com_wsgi.py"
+
+        # Pull latest code
+        subprocess.check_call(f"cd {backend_path} && git reset --hard && git pull origin main", shell=True)
+
+        # Install dependencies using virtualenv python
+        subprocess.check_call(f"{venv_python} -m pip install -r {backend_path}/requirements.txt", shell=True)
+
+        # Reload app
+        subprocess.check_call(f"touch {wsgi_file}", shell=True)
+
+        return "Updated successfully!"
+    except subprocess.CalledProcessError as e:
+        return f"Update failed: {e}"
 
 if __name__ == "__main__":
     app.run()
