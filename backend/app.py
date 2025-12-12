@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request 
 import subprocess
 
 app = Flask(__name__)
@@ -7,8 +7,18 @@ app = Flask(__name__)
 def index():
     return "Hello World"
 
-@app.route("/update")
-def update():
+MAIN_BRANCH = "refs/heads/main"
+
+@app.route("/update",methods=["POST"])
+def update(): 
+    data = request.json
+    if not data:
+        return "No payload", 400
+
+    # Only trigger on pushes to main
+    if data.get("ref") != MAIN_BRANCH:
+        return "Not main branch, no update triggered", 200
+
     try:
         backend_path = "/home/hackathonharmonyteam/hackathon_project/backend"
         venv_python = "/home/hackathonharmonyteam/hackathon_project/backend/venv/bin/python3.13"  # adjust to your virtualenv python
