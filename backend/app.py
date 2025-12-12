@@ -10,7 +10,7 @@ def index():
 @app.route("/update")
 def update():
     try:
-        backend_path = "/home/hackathonharmonyteam/hachathon_project/backend"
+        backend_path = "/home/hackathonharmonyteam/hackathon_project/backend"
         venv_python = "/home/hackathonharmonyteam/venv/bin/python3.10"  # adjust to your virtualenv python
         wsgi_file = "/var/www/hackathonharmonyteam_pythonanywhere_com_wsgi.py"
 
