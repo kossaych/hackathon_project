@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mental Health Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #374151; }
+  .calendar-container { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+  .month { 
+    flex: 1 1 250px; 
+    background: linear-gradient(to bottom, #ffffff, #e0f7fa); 
+    border-radius: 1rem; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+    padding: 0.5rem; 
+    transition: transform 0.2s; 
+  }
+  .month:hover { transform: scale(1.02); }
+  .month-title { text-align: center; font-weight: 600; margin: 0.5rem 0; color: #0f172a; font-size: 1rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th { color: #1e3a8a; font-weight: 600; font-size: 0.75rem; }
+  td { width: 32px; height: 32px; text-align: center; vertical-align: middle; padding: 1px; }
+  svg { width: 28px; height: 28px; }
+</style>
+</head>
+<body class="flex h-screen">
+
+  <!-- Sidebar -->
+  <!-- Sidebar -->
+  <!-- Sidebar -->
+  <!-- Sidebar -->
+  <!-- Sidebar -->
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-xl rounded-r-2xl flex flex-col h-screen relative">
+    <div class="text-center py-6 border-b border-gray-200">
+      <img src="logo.jpg" alt="Logo" class="mx-auto w-20 h-20 object-cover mb-3 rounded-full shadow-lg">
+      <h1 class="text-2xl font-bold text-teal-600">Wellness Menu</h1>
+    </div>
+
+    <nav class="flex-1 flex flex-col mt-6">
+      <a href="dashboard.html" class="px-6 py-3 mb-2 text-gray-700 font-medium rounded-l-full hover:bg-teal-50 hover:text-teal-700 transition flex items-center gap-3">
+        Dashboard
+      </a>
+      <a href="settings.html" class="px-6 py-3 mb-2 text-gray-700 font-medium rounded-l-full hover:bg-teal-50 hover:text-teal-700 transition flex items-center gap-3">
+        Settings
+      </a>
+    </nav>
+
+    <!-- Chatbot button -->
+    <a href="chatbot.html"
+       class="absolute bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-full shadow-lg hover:bg-teal-700 transition flex items-center gap-2">
+      <span class="material-icons">chat</span>
+      Chatbot
+    </a>
+
+    <div class="px-6 py-4 border-t border-gray-200 text-sm text-gray-500 mt-auto">
+      &copy; 2025 Wellness App
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto p-6">
+    <header class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-indigo-700 mb-2">Mental Health Dashboard</h1>
+      <p class="text-indigo-500 text-lg">Track mood distribution and emotional trends</p>
+    </header>
+
+    <!-- DAILY MOOD CALENDAR -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-6 text-indigo-600 text-center">Daily Mood Calendar</h2>
+      <div id="calendar-container" class="calendar-container"></div>
+    </section>
+
+    <!-- PIE CHART AND LINE CHART -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- PIE CHART -->
+      <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-indigo-700">Mood Distribution</h2>
+        <canvas id="pieChart" height="260"></canvas>
+      </div>
+
+      <!-- LINE CHART WITH CUSTOM DROPDOWN -->
+      <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-semibold mb-4 text-green-700">Emotion Trends Over Time</h2>
+
+        <!-- Custom dropdown -->
+        <div class="relative mb-4">
+          <button id="dropdownBtn" class="w-full text-left border border-green-300 rounded-lg p-2 bg-white flex justify-between items-center">
+            <span id="selectedEmotions">Happy</span>
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div id="dropdownMenu" class="absolute mt-1 w-full bg-white border border-green-300 rounded-lg shadow-lg z-10 hidden max-h-48 overflow-y-auto"></div>
+        </div>
+
+        <canvas id="lineChart" height="260"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  // ---------------- UTILITIES ----------------
+  function groupByMonth(calendar) {
+    const months = {};
+    calendar.forEach(d => {
+      const date = new Date(d.date);
+      const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+      if (!months[key]) months[key] = [];
+      months[key].push(d);
+    });
+    return months;
+  }
+
+  // ---------------- RENDER CALENDAR ----------------
+  function renderCalendar(calendar) {
+    const container = document.getElementById("calendar-container");
+    container.innerHTML = "";
+    const months = groupByMonth(calendar);
+
+    Object.keys(months).sort().forEach(monthKey => {
+      const monthDays = months[monthKey];
+      const [year, month] = monthKey.split("-");
+      const firstDay = new Date(year, month-1, 1).getDay();
+      const lastDate = new Date(year, month, 0).getDate();
+
+      const monthDiv = document.createElement("div");
+      monthDiv.className = "month";
+      monthDiv.innerHTML = `<div class="month-title">${new Date(year, month-1).toLocaleString('default',{month:'long', year:'numeric'})}</div>`;
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      thead.innerHTML = `<tr>
+        <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+      </tr>`;
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      let week = document.createElement("tr");
+
+      for(let i=0;i<firstDay;i++) week.appendChild(document.createElement("td"));
+
+      for(let day=1; day<=lastDate; day++){
+        const td = document.createElement("td");
+        const dayStr = `${year}-${month}-${String(day).padStart(2,'0')}`;
+        const dayData = monthDays.find(d=>d.date===dayStr);
+
+        if(dayData){
+          const total = dayData.positive + dayData.negative + dayData.neutral || 1;
+          const pos = (dayData.positive/total)*100;
+          const neg = (dayData.negative/total)*100;
+          const neu = (dayData.neutral/total)*100;
+
+          td.innerHTML = `
+            <div class="relative w-7 h-7 mx-auto">
+              <svg viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="16" stroke="#cbd5e1" stroke-width="3" fill="none"/>
+                <circle cx="18" cy="18" r="16" stroke="#34d399" stroke-width="3" fill="none"
+                  stroke-dasharray="${pos} 100" stroke-dashoffset="0"/>
+                <circle cx="18" cy="18" r="16" stroke="#f87171" stroke-width="3" fill="none"
+                  stroke-dasharray="${neg} 100" stroke-dashoffset="${pos}"/>
+                <circle cx="18" cy="18" r="16" stroke="#60a5fa" stroke-width="3" fill="none"
+                  stroke-dasharray="${neu} 100" stroke-dashoffset="${pos+neg}"/>
+                <text x="18" y="18" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="#111">${day}</text>
+              </svg>
+            </div>`;
+          td.title = `😊 Positive: ${dayData.positive}\n😐 Neutral: ${dayData.neutral}\n☹️ Negative: ${dayData.negative}`;
+        }
+
+        week.appendChild(td);
+        if((day+firstDay)%7===0){ tbody.appendChild(week); week=document.createElement("tr"); }
+      }
+      tbody.appendChild(week);
+      table.appendChild(tbody);
+      monthDiv.appendChild(table);
+      container.appendChild(monthDiv);
+    });
+  }
+
+  // ---------------- PIE CHART ----------------
+  function renderPieChart(pie){
+    const ctx = document.getElementById("pieChart");
+    new Chart(ctx,{
+      type:'pie',
+      data:{
+        labels: pie.map(d=>`${d.mood} (${d.percentage.toFixed(1)}%)`),
+        datasets:[{
+          data:pie.map(d=>d.count), 
+          backgroundColor:['#f87171','#60a5fa','#34d399'], 
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{position:'bottom'}}
+      }
+    });
+  }
+
+  // ---------------- LINE CHART ----------------
+  let lineChartInstance;
+  let selectedEmotions = ["happy"];
+
+  function renderLineChart(lines, selected) {
+    const ctx = document.getElementById("lineChart");
+    const labels = [...new Set(Object.values(lines).flat().map(p => p.date))].sort();
+
+    const datasets = Object.entries(lines)
+      .filter(([emotion]) => selected.includes(emotion))
+      .map(([emotion, points]) => ({
+        label: emotion,
+        data: labels.map(l => { 
+          const found = points.find(p => p.date === l); 
+          return found ? found.value : null; 
+        }),
+        tension: 0.35,
+        spanGaps: true,
+        borderWidth: 2
+      }));
+
+    if(lineChartInstance) lineChartInstance.destroy();
+
+    lineChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        scales: { y: { min: 0, max: 1, title: { display: true, text: 'Emotion Intensity' } } },
+        responsive: true
+      }
+    });
+  }
+
+  // ---------------- CUSTOM DROPDOWN ----------------
+  const dropdownBtn = document.getElementById("dropdownBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+  const selectedSpan = document.getElementById("selectedEmotions");
+
+  function populateDropdown(lines) {
+    dropdownMenu.innerHTML = "";
+    Object.keys(lines).forEach(em => {
+      const option = document.createElement("label");
+      option.className = "flex items-center px-3 py-1 hover:bg-green-50 cursor-pointer";
+      option.innerHTML = `
+        <input type="checkbox" value="${em}" class="mr-2" ${em === "happy" ? "checked" : ""}/>
+        <span>${em.charAt(0).toUpperCase() + em.slice(1)}</span>
+      `;
+      dropdownMenu.appendChild(option);
+    });
+
+    dropdownMenu.querySelectorAll("input[type=checkbox]").forEach(cb => {
+      cb.addEventListener("change", () => {
+        selectedEmotions = Array.from(dropdownMenu.querySelectorAll("input:checked")).map(i => i.value);
+        selectedSpan.textContent = selectedEmotions.map(e => e.charAt(0).toUpperCase() + e.slice(1)).join(", ") || "None";
+        renderLineChart(lines, selectedEmotions);
+      });
+    });
+
+    renderLineChart(lines, selectedEmotions);
+  }
+
+  dropdownBtn.addEventListener("click", () => {
+    dropdownMenu.classList.toggle("hidden");
+  });
+  document.addEventListener("click", e => {
+    if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+      dropdownMenu.classList.add("hidden");
+    }
+  });
+
+  // ---------------- LOAD DASHBOARD ----------------
+  async function loadDashboard() {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/insights/summary");
+      const data = await res.json();
+      renderCalendar(data.calendar);
+      renderPieChart(data.pie);
+      populateDropdown(data.lines);
+    } catch(err) {
+      console.error("Failed to load dashboard data:", err);
+      document.getElementById("calendar-container").innerHTML = "<p class='text-red-500'>Failed to load calendar data.</p>";
+    }
+  }
+
+  loadDashboard();
+  </script>
+</body>
+</html>
