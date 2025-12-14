@@ -1,0 +1,11 @@
+Model Information:
+* title:	Basic human model.
+* source:	https://sketchfab.com/3d-models/basic-human-model-3e26036b0c7f42edbe01d7027c76e939
+* author:	Night12fury (https://sketchfab.com/Night12fury)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Basic human model." (https://sketchfab.com/3d-models/basic-human-model-3e26036b0c7f42edbe01d7027c76e939) by Night12fury (https://sketchfab.com/Night12fury) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
