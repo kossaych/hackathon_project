@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mental Health Chatbot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen bg-gradient-to-br from-green-50 to-blue-50 text-gray-900">
+
+  <!-- Sidebar -->
+<aside class="w-64 bg-white shadow-xl rounded-r-2xl flex flex-col h-screen">
+  <!-- Header / Logo -->
+  <div class="text-center py-6 border-b border-gray-200">
+    <img src="logo.jpg" alt="Logo" class="mx-auto w-20 h-20 object-cover mb-3 rounded-full shadow-lg">
+    <h1 class="text-2xl font-bold text-teal-600">Wellness Menu</h1>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 flex flex-col mt-6">
+    <a href="dashboard.html" 
+       class="px-6 py-3 mb-2 text-gray-700 font-medium rounded-l-full hover:bg-teal-50 hover:text-teal-700 transition flex items-center gap-3">
+      <span class="material-icons">dashboard</span>
+      Dashboard
+    </a>
+    <a href="settings.html" 
+       class="px-6 py-3 mb-2 text-gray-700 font-medium rounded-l-full hover:bg-teal-50 hover:text-teal-700 transition flex items-center gap-3">
+      <span class="material-icons">settings</span>
+      Settings
+    </a>
+  </nav>
+
+  <!-- Optional Footer -->
+  <div class="px-6 py-4 border-t border-gray-200 text-sm text-gray-500">
+    &copy; 2025 Wellness App
+  </div>
+</aside>
+
+
+  <!-- Chat Area -->
+  <div class="flex-1 flex flex-col">
+    <!-- Header -->
+    <div class="bg-white py-4 px-6 border-b border-gray-200 font-semibold text-lg text-teal-700 shadow-sm">
+       Chat
+    </div>
+
+    <!-- Chat Messages -->
+    <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-teal-300 scrollbar-track-teal-50">
+      <!-- Messages will appear here -->
+    </div>
+
+    <!-- Input Area -->
+    <div class="bg-white p-4 border-t border-gray-200 flex items-center gap-3 shadow-inner rounded-t-xl">
+      <input id="chat-input" type="text" placeholder="How are you feeling today?"
+             class="flex-1 bg-green-50 text-gray-900 px-4 py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-400 placeholder-gray-400">
+      <button id="send-btn"
+              class="bg-teal-500 hover:bg-teal-400 text-white px-4 py-3 rounded-full transition shadow-md">
+        Send
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const chatContainer = document.getElementById("chat-container");
+    const chatInput = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    const USER_ID = 1;
+
+    function appendMessage(role, text) {
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `flex ${role === "user" ? "justify-end" : "justify-start"}`;
+      msgDiv.innerHTML = `
+        <div class="max-w-xs md:max-w-md px-4 py-2 rounded-2xl shadow ${
+          role === "user" 
+            ? "bg-teal-500 text-white rounded-br-none" 
+            : "bg-white text-gray-900 rounded-bl-none border border-gray-200"
+        }">
+          ${text}
+        </div>
+      `;
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      appendMessage("user", message);
+      chatInput.value = "";
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/chat", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({user_id: USER_ID, message})
+        });
+        const data = await response.json();
+        appendMessage("bot", data.reply);
+      } catch (err) {
+        console.error(err);
+        appendMessage("bot", "Error: Could not reach the server.");
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+
+</body>
+</html>
