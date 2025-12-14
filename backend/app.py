@@ -22,7 +22,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 # OpenRouter API Configuration
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # List of models to try in order
